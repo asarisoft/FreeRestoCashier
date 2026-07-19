@@ -65,19 +65,22 @@ class _PosPageState extends ConsumerState<PosPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Categories Sidebar
-        Container(
-          width: 220,
-          color: AppColors.background,
-          padding: const EdgeInsets.all(24),
+        // Main Content (Categories + Grid)
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
-              Text('Choose Menu', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              Expanded(
+              Padding(
+                padding: const EdgeInsets.only(left: 24, top: 24),
+                child: Text('Order Menu', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 16),
+              // Horizontal Categories
+              SizedBox(
+                height: 50,
                 child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     final cat = categories[index];
@@ -90,12 +93,12 @@ class _PosPageState extends ConsumerState<PosPage> {
                   },
                 ),
               ),
+              // Main Products
+              Expanded(
+                child: _ProductGrid(products: products, cart: cart, isWide: true),
+              ),
             ],
           ),
-        ),
-        // Main Products
-        Expanded(
-          child: _ProductGrid(products: products, cart: cart, isWide: true),
         ),
         // Cart Sidebar
         Container(
@@ -189,27 +192,22 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      child: Container(
+        margin: const EdgeInsets.only(right: 24),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            if (!isSelected)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-          ],
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              width: 3,
+            ),
+          ),
         ),
         child: Text(
           label,
           style: AppTypography.textTheme.titleMedium?.copyWith(
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? AppColors.onPrimary : AppColors.textPrimary,
+            color: isSelected ? AppColors.primary : AppColors.textPrimary,
           ),
         ),
       ),
@@ -262,137 +260,116 @@ class _PosProductCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = AppTypography.textTheme;
     final notif = ref.read(cartProvider.notifier);
+    final isSelected = cartQty > 0;
     
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Image
-          Expanded(
-            flex: 4,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: product.imageUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: product.imageUrl!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: const Color(0xFFFFF7E0),
-                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        color: const Color(0xFFFFF7E0),
-                        child: const Icon(Icons.fastfood, size: 48, color: Color(0xFFFFD568)),
-                      ),
-                    )
-                  : Container(
-                      color: const Color(0xFFFFF7E0),
-                      child: const Center(
-                        child: Icon(Icons.fastfood, size: 48, color: Color(0xFFFFD568)),
+    return GestureDetector(
+      onTap: product.ready ? () => notif.addItem(product) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: [
+            if (!isSelected)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Image with Checkmark
+            Expanded(
+              flex: 5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                    child: product.imageUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: product.imageUrl!,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(
+                              color: const Color(0xFFF3F4F6),
+                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: const Color(0xFFF3F4F6),
+                              child: const Icon(Icons.fastfood, size: 48, color: Colors.grey),
+                            ),
+                          )
+                        : Container(
+                            color: const Color(0xFFF3F4F6),
+                            child: const Center(
+                              child: Icon(Icons.fastfood, size: 48, color: Colors.grey),
+                            ),
+                          ),
+                  ),
+                  if (isSelected)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.check, size: 16, color: AppColors.onPrimary),
                       ),
                     ),
-            ),
-          ),
-          // Content
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Placeholder for description
-                  Text(
-                    'Delicious and freshly made',
-                    style: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AmountText(
-                        amount: product.price,
-                        style: textTheme.titleSmall?.copyWith(
-                          color: AppColors.price,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      // Add / Counter control
-                      if (cartQty == 0)
-                        InkWell(
-                          onTap: product.ready ? () => notif.addItem(product) : null,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.add, size: 18, color: AppColors.onPrimary),
-                          ),
-                        )
-                      else
-                        Row(
-                          children: [
-                            InkWell(
-                              onTap: () => notif.updateQty(
-                                  ref.read(cartProvider).indexWhere((i) => i.productId == product.id),
-                                  cartQty - 1),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.border,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.remove, size: 16),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
-                              child: Text('$cartQty', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                            ),
-                            InkWell(
-                              onTap: () => notif.updateQty(
-                                  ref.read(cartProvider).indexWhere((i) => i.productId == product.id),
-                                  cartQty + 1),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.add, size: 16, color: AppColors.onPrimary),
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
                 ],
               ),
             ),
-          ),
-        ],
+            // Content
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        AmountText(
+                          amount: product.price,
+                          style: textTheme.titleSmall?.copyWith(
+                            color: AppColors.price,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (product.category != null)
+                      Text(
+                        product.category!,
+                        style: textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -511,49 +488,81 @@ class _CartItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = AppTypography.textTheme;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(item.name, style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              if (item.discount > 0)
-                Text('Disc: Rp ${item.discount}', style: textTheme.labelSmall?.copyWith(color: AppColors.error)),
-              const SizedBox(height: 8),
-              // Notes button mockup
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(8),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.fastfood, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name, 
+                  style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                const SizedBox(height: 8),
+                Row(
                   children: [
-                    const Icon(Icons.edit_note, size: 14, color: AppColors.success),
-                    const SizedBox(width: 4),
-                    Text('Notes', style: textTheme.labelSmall?.copyWith(color: AppColors.success, fontWeight: FontWeight.bold)),
+                    InkWell(
+                      onTap: () => notifier.updateQty(index, item.qty - 1),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.remove, size: 16, color: AppColors.primary),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('${item.qty}', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    ),
+                    InkWell(
+                      onTap: () => notifier.updateQty(index, item.qty + 1),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(Icons.add, size: 16, color: AppColors.primary),
+                      ),
+                    ),
                   ],
                 ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              AmountText(
+                amount: item.subtotal,
+                style: textTheme.titleSmall?.copyWith(
+                  color: AppColors.price,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              if (item.discount > 0)
+                Text('Disc: Rp ${item.discount}', style: textTheme.labelSmall?.copyWith(color: AppColors.error)),
             ],
           ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text('x${item.qty}', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            AmountText(
-              amount: item.subtotal,
-              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

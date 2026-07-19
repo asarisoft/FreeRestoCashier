@@ -23,12 +23,12 @@ class ProductRepository {
   Stream<QuerySnapshot> stream() =>
       _col.where('archived', isEqualTo: false).orderBy('name').snapshots();
 
+  Future<DocumentReference> add(Product product) async {
+    return await _col.add(product.toJson());
+  }
+
   Future<void> save(Product product) async {
-    if (product.id == null) {
-      await _col.add(product.toJson());
-    } else {
-      await _col.doc(product.id).update(product.toJson());
-    }
+    await _col.doc(product.id!).update(product.toJson());
   }
 
   Future<void> delete(String id) async {

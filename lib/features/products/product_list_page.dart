@@ -17,7 +17,13 @@ class ProductListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Produk')),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text('Produk'),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+      ),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -28,6 +34,7 @@ class ProductListPage extends ConsumerWidget {
               title: 'Belum ada produk',
               subtitle: 'Tambahkan produk pertama Anda',
               action: FilledButton.icon(
+                style: FilledButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: AppColors.onPrimary),
                 icon: const Icon(Icons.add),
                 label: const Text('Tambah Produk'),
                 onPressed: () => _openForm(context, ref),
@@ -39,6 +46,8 @@ class ProductListPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_product',
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),
@@ -178,8 +187,10 @@ class _ProductCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     AmountText(
                       amount: product.price,
-                      style: textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.price,
+                      ),
                     ),
                   ],
                 ),

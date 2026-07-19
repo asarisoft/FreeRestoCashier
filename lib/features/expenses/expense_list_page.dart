@@ -32,7 +32,12 @@ class _ExpenseListPageState extends ConsumerState<ExpenseListPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Pengeluaran')),
+      appBar: AppBar(
+        title: const Text('Pengeluaran'),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+      ),
       body: Column(
         children: [
           Padding(
@@ -151,13 +156,7 @@ class _ExpenseItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          )
-        ],
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [

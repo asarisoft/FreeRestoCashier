@@ -17,13 +17,7 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          )
-        ],
+        border: Border.all(color: AppColors.border),
       ),
       child: child,
     );
@@ -49,13 +43,7 @@ class AppCardButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: AppColors.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              )
-            ],
+            border: Border.all(color: AppColors.border),
           ),
           child: DefaultTextStyle(
             style: AppTypography.textTheme.bodyLarge!,

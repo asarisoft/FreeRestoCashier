@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/primary_button.dart';
@@ -27,9 +30,9 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
   String? _imageUrl;
   bool _ready = true;
   bool _saving = false;
-  bool _uploading = false;
 
   final _imageService = ProductImageService();
+  XFile? _pickedFile;
 
   bool get _editing => widget.product != null;
 
@@ -67,7 +70,7 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
           padding: const EdgeInsets.all(24),
           children: [
             GestureDetector(
-              onTap: _uploading ? null : _pickImage,
+              onTap: _saving ? null : _pickImage,
               child: Container(
                 height: 160,
                 decoration: BoxDecoration(
@@ -79,9 +82,33 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: _uploading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _imageUrl != null
+                      child: _pickedFile != null
+                        ? Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.file(
+                                File(_pickedFile!.path),
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _pickedFile = null),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close,
+                                        size: 18, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : _imageUrl != null
                         ? Stack(
                             fit: StackFit.expand,
                             children: [
@@ -97,7 +124,10 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
                                 top: 8,
                                 right: 8,
                                 child: GestureDetector(
-                                  onTap: () => setState(() => _imageUrl = null),
+                                  onTap: () {
+                                    setState(() => _imageUrl = null);
+                                    _pickedFile = null;
+                                  },
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(
@@ -192,21 +222,10 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
   Future<void> _pickImage() async {
     final file = await _imageService.pickImage();
     if (file == null) return;
-    setState(() => _uploading = true);
-    try {
-      final uid = ref.read(userIdProvider)!;
-      final tempId = widget.product?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
-      final url = await _imageService.upload(uid, tempId, file);
-      setState(() => _imageUrl = url);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal upload: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _uploading = false);
-    }
+    setState(() {
+      _pickedFile = file;
+      _imageUrl = null;
+    });
   }
 
   Future<void> _save() async {
@@ -214,7 +233,9 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
     setState(() => _saving = true);
     try {
       final repo = ref.read(productRepositoryProvider);
+      final uid = ref.read(userIdProvider)!;
       final now = DateTime.now();
+
       final product = Product(
         id: widget.product?.id,
         name: _nameCtrl.text.trim(),
@@ -227,11 +248,30 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
             : int.parse(_hppCtrl.text.trim()),
         ready: _ready,
         archived: widget.product?.archived ?? false,
-        imageUrl: _imageUrl,
+        imageUrl: widget.product?.imageUrl,
         createdAt: widget.product?.createdAt ?? now,
         updatedAt: now,
       );
-      await repo.save(product);
+
+      String? savedId = product.id;
+      if (savedId == null) {
+        final docRef = await repo.add(product);
+        savedId = docRef.id;
+      } else {
+        await repo.save(product);
+      }
+
+      if (_pickedFile != null) {
+        if (widget.product?.imageUrl != null) {
+          await _imageService.delete(uid, savedId);
+        }
+        final url = await _imageService.upload(uid, savedId, _pickedFile!);
+        await FirebaseFirestore.instance
+            .doc('users/$uid/products/$savedId')
+            .update({'imageUrl': url, 'updatedAt': now});
+      }
+
+      ref.invalidate(productListProvider);
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
