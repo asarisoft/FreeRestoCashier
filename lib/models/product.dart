@@ -6,6 +6,7 @@ class Product {
   final int hpp;
   final bool ready;
   final bool archived;
+  final String? imageUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -17,6 +18,7 @@ class Product {
     this.hpp = 0,
     this.ready = true,
     this.archived = false,
+    this.imageUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -28,6 +30,7 @@ class Product {
         'hpp': hpp,
         'ready': ready,
         'archived': archived,
+        'imageUrl': imageUrl,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
       };
@@ -40,6 +43,7 @@ class Product {
         hpp: json['hpp'] as int? ?? 0,
         ready: json['ready'] as bool? ?? true,
         archived: json['archived'] as bool? ?? false,
+        imageUrl: json['imageUrl'] as String?,
         createdAt: (json['createdAt'] as dynamic).toDate(),
         updatedAt: (json['updatedAt'] as dynamic).toDate(),
       );
@@ -51,6 +55,7 @@ class Product {
     int? hpp,
     bool? ready,
     bool? archived,
+    String? imageUrl,
   }) =>
       Product(
         id: id,
@@ -60,6 +65,7 @@ class Product {
         hpp: hpp ?? this.hpp,
         ready: ready ?? this.ready,
         archived: archived ?? this.archived,
+        imageUrl: imageUrl ?? this.imageUrl,
         createdAt: createdAt,
         updatedAt: DateTime.now(),
       );

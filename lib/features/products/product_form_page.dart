@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../models/product.dart';
+import '../../features/auth/auth_controller.dart';
 import '../products/product_providers.dart';
+import 'product_image_service.dart';
 
 class ProductFormPage extends ConsumerStatefulWidget {
   final Product? product;
@@ -17,12 +20,16 @@ class ProductFormPage extends ConsumerStatefulWidget {
 
 class _ProductFormPageState extends ConsumerState<ProductFormPage> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _nameCtrl;
-  late final TextEditingController _categoryCtrl;
-  late final TextEditingController _priceCtrl;
-  late final TextEditingController _hppCtrl;
-  late bool _ready;
+  final _nameCtrl = TextEditingController();
+  final _categoryCtrl = TextEditingController();
+  final _priceCtrl = TextEditingController();
+  final _hppCtrl = TextEditingController();
+  String? _imageUrl;
+  bool _ready = true;
   bool _saving = false;
+  bool _uploading = false;
+
+  final _imageService = ProductImageService();
 
   bool get _editing => widget.product != null;
 
@@ -30,12 +37,11 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
   void initState() {
     super.initState();
     final p = widget.product;
-    _nameCtrl = TextEditingController(text: p?.name ?? '');
-    _categoryCtrl = TextEditingController(text: p?.category ?? '');
-    _priceCtrl =
-        TextEditingController(text: p != null ? p.price.toString() : '');
-    _hppCtrl =
-        TextEditingController(text: p != null ? p.hpp.toString() : '');
+    _nameCtrl.text = p?.name ?? '';
+    _categoryCtrl.text = p?.category ?? '';
+    _priceCtrl.text = p != null ? p.price.toString() : '';
+    _hppCtrl.text = p != null ? p.hpp.toString() : '';
+    _imageUrl = p?.imageUrl;
     _ready = p?.ready ?? true;
   }
 
@@ -60,6 +66,66 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
+            GestureDetector(
+              onTap: _uploading ? null : _pickImage,
+              child: Container(
+                height: 160,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.border,
+                    style: _imageUrl == null ? BorderStyle.solid : BorderStyle.none,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: _uploading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _imageUrl != null
+                        ? Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: _imageUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => const Center(
+                                    child: CircularProgressIndicator()),
+                                errorWidget: (_, __, ___) => const Icon(
+                                    Icons.broken_image, size: 48),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: GestureDetector(
+                                  onTap: () => setState(() => _imageUrl = null),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close,
+                                        size: 18, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_photo_alternate_outlined,
+                                  size: 40,
+                                  color: AppColors.textSecondary),
+                              const SizedBox(height: 8),
+                              Text('Tap untuk tambah foto',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.textSecondary)),
+                            ],
+                          ),
+              ),
+            ),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _nameCtrl,
               decoration: const InputDecoration(labelText: 'Nama Produk *'),
@@ -82,7 +148,6 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
               decoration: const InputDecoration(
                 labelText: 'Harga Jual (Rp) *',
                 prefixText: 'Rp ',
-                hintText: '0',
               ),
               keyboardType: TextInputType.number,
               validator: (v) {
@@ -124,6 +189,26 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
     );
   }
 
+  Future<void> _pickImage() async {
+    final file = await _imageService.pickImage();
+    if (file == null) return;
+    setState(() => _uploading = true);
+    try {
+      final uid = ref.read(userIdProvider)!;
+      final tempId = widget.product?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final url = await _imageService.upload(uid, tempId, file);
+      setState(() => _imageUrl = url);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal upload: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -142,13 +227,18 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
             : int.parse(_hppCtrl.text.trim()),
         ready: _ready,
         archived: widget.product?.archived ?? false,
+        imageUrl: _imageUrl,
         createdAt: widget.product?.createdAt ?? now,
         updatedAt: now,
       );
       await repo.save(product);
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      // TODO: error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal simpan: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

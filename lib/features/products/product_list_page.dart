@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/empty_state.dart';
@@ -16,7 +17,6 @@ class ProductListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Produk')),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -39,8 +39,6 @@ class ProductListPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_product',
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),
@@ -76,7 +74,7 @@ class _ProductGrid extends ConsumerWidget {
               crossAxisCount: cols,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: isWide ? 1.4 : 1.2,
+              childAspectRatio: isWide ? 1.2 : 1.0,
             ),
             itemCount: products.length,
             itemBuilder: (_, i) => _ProductCard(
@@ -120,52 +118,73 @@ class _ProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            )
-          ],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    product.name,
-                    style: textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onToggleReady,
-                  child: ReadyChip(ready: product.ready),
-                ),
-              ],
+            Expanded(
+              flex: 3,
+              child: product.imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: product.imageUrl!,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                          color: AppColors.background,
+                          child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2))),
+                      errorWidget: (_, __, ___) => Container(
+                          color: AppColors.background,
+                          child: const Icon(Icons.restaurant, size: 32,
+                              color: AppColors.textSecondary)),
+                    )
+                  : Container(
+                      color: AppColors.background,
+                      child: const Center(
+                        child: Icon(Icons.restaurant, size: 32,
+                            color: AppColors.textSecondary),
+                      ),
+                    ),
             ),
-            const Spacer(),
-            AmountText(
-              amount: product.price,
-              style: textTheme.titleMedium?.copyWith(
-                color: AppColors.price,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            product.name,
+                            style: textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: onToggleReady,
+                          child: ReadyChip(ready: product.ready),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    AmountText(
+                      amount: product.price,
+                      style: textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
               ),
             ),
-            if (product.hpp > 0)
-              Text(
-                'HPP: Rp ${product.hpp}',
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary),
-              ),
           ],
         ),
       ),

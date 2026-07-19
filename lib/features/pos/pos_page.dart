@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
@@ -11,7 +12,6 @@ import '../../printer/printer_service.dart';
 import '../../printer/receipt_builder.dart';
 import '../../features/products/product_providers.dart';
 import '../pos/cart_provider.dart';
-import '../pos/transaction_repository.dart';
 import '../auth/auth_controller.dart';
 import '../reports/report_providers.dart';
 
@@ -278,17 +278,31 @@ class _PosProductCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Image Placeholder
+          // Image
           Expanded(
             flex: 4,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFF7E0), // Soft yellow background for placeholder
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: const Center(
-                child: Icon(Icons.fastfood, size: 48, color: Color(0xFFFFD568)),
-              ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: product.imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: product.imageUrl!,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        color: const Color(0xFFFFF7E0),
+                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        color: const Color(0xFFFFF7E0),
+                        child: const Icon(Icons.fastfood, size: 48, color: Color(0xFFFFD568)),
+                      ),
+                    )
+                  : Container(
+                      color: const Color(0xFFFFF7E0),
+                      child: const Center(
+                        child: Icon(Icons.fastfood, size: 48, color: Color(0xFFFFD568)),
+                      ),
+                    ),
             ),
           ),
           // Content
