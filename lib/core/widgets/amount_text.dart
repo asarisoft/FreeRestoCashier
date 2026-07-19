@@ -17,7 +17,7 @@ class AmountText extends StatelessWidget {
     super.key,
     required this.amount,
     this.style,
-    this.showZero = false,
+    this.showZero = true,
   });
 
   @override

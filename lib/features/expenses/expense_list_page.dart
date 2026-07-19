@@ -31,6 +31,7 @@ class _ExpenseListPageState extends ConsumerState<ExpenseListPage> {
     final sumAsync = ref.watch(expenseSumProvider(range));
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Pengeluaran')),
       body: Column(
         children: [
@@ -100,8 +101,7 @@ class _ExpenseListPageState extends ConsumerState<ExpenseListPage> {
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: expenses.length,
-                    itemBuilder: (_, i) =>
-                        _ExpenseItem(expense: expenses[i]),
+                    itemBuilder: (_, i) => _ExpenseItem(expense: expenses[i]),
                   ),
                 );
               },
@@ -111,6 +111,8 @@ class _ExpenseListPageState extends ConsumerState<ExpenseListPage> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_expense',
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         onPressed: () => _add(context),
         child: const Icon(Icons.add),
       ),
@@ -148,8 +150,14 @@ class _ExpenseItem extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          )
+        ],
       ),
       child: Row(
         children: [
@@ -213,14 +221,17 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               TextFormField(
                 controller: _amtCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Jumlah (Rp) *',
                   prefixText: 'Rp ',
+                  hintText: '0',
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
@@ -270,7 +281,8 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
           ),
         ),
       ),
-      actions: [
+    ),
+    actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Batal'),

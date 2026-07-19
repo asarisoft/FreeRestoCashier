@@ -82,6 +82,7 @@ class _ProductFormPageState extends ConsumerState<ProductFormPage> {
               decoration: const InputDecoration(
                 labelText: 'Harga Jual (Rp) *',
                 prefixText: 'Rp ',
+                hintText: '0',
               ),
               keyboardType: TextInputType.number,
               validator: (v) {

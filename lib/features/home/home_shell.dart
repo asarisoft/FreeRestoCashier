@@ -55,30 +55,32 @@ class _MainShellState extends ConsumerState<_MainShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
+        backgroundColor: Colors.white,
+        indicatorColor: const Color(0xFFFFCA40), // AppColors.primary
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.point_of_sale_outlined),
-            selectedIcon: Icon(Icons.point_of_sale),
+            selectedIcon: Icon(Icons.point_of_sale, color: Color(0xFF111827)),
             label: 'Kasir',
           ),
           NavigationDestination(
             icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2),
+            selectedIcon: Icon(Icons.inventory_2, color: Color(0xFF111827)),
             label: 'Produk',
           ),
           NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
+            selectedIcon: Icon(Icons.bar_chart, color: Color(0xFF111827)),
             label: 'Laporan',
           ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
+            selectedIcon: Icon(Icons.receipt_long, color: Color(0xFF111827)),
             label: 'Biaya',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
+            selectedIcon: Icon(Icons.settings, color: Color(0xFF111827)),
             label: 'Setting',
           ),
         ],

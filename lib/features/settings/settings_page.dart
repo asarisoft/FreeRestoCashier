@@ -19,6 +19,7 @@ class SettingsPage extends ConsumerWidget {
     final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Setting')),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -107,14 +108,20 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _infoRow(String label, String value, TextTheme tt) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: tt.bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary)),
-          const SizedBox(width: 12),
-          Text(value, style: tt.bodyLarge),
+          Expanded(
+            flex: 2,
+            child: Text(label,
+                style: tt.bodyMedium?.copyWith(color: AppColors.textSecondary)),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(value, 
+                style: tt.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+          ),
         ],
       ),
     );
@@ -205,9 +212,11 @@ class _EditProfileDialogState
     return AlertDialog(
       title: const Text('Edit Profil'),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             TextField(
               controller: _nameCtrl,
               decoration: const InputDecoration(labelText: 'Nama Resto'),
@@ -235,21 +244,63 @@ class _EditProfileDialogState
                 Text('Ukuran Kertas:',
                     style: AppTypography.textTheme.bodyLarge),
                 const SizedBox(width: 12),
-                SegmentedButton<int>(
-                  segments: const [
-                    ButtonSegment(value: 58, label: Text('58mm')),
-                    ButtonSegment(value: 80, label: Text('80mm')),
-                  ],
-                  selected: {_paperWidth},
-                  onSelectionChanged: (v) =>
-                      setState(() => _paperWidth = v.first),
-                ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _paperWidth = 58),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: _paperWidth == 58 ? AppColors.primary : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text('58mm', style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: _paperWidth == 58 ? FontWeight.bold : FontWeight.normal,
+                                  color: _paperWidth == 58 ? AppColors.onPrimary : AppColors.textSecondary,
+                                )),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _paperWidth = 80),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: _paperWidth == 80 ? AppColors.primary : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text('80mm', style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: _paperWidth == 80 ? FontWeight.bold : FontWeight.normal,
+                                  color: _paperWidth == 80 ? AppColors.onPrimary : AppColors.textSecondary,
+                                )),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
         ),
       ),
-      actions: [
+    ),
+    actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Batal'),

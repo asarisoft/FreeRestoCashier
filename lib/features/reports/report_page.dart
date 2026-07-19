@@ -44,18 +44,58 @@ class _ReportPageState extends ConsumerState<ReportPage> {
     final recentAsync = ref.watch(recentTransactionsProvider);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Laporan')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SegmentedButton<int>(
-            segments: const [
-              ButtonSegment(value: 0, label: Text('Hari Ini')),
-              ButtonSegment(value: 1, label: Text('Bulan Ini')),
-            ],
-            selected: {_tab},
-            onSelectionChanged: (v) =>
-                setState(() => _tab = v.first),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _tab = 0),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _tab == 0 ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('Hari Ini', style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: _tab == 0 ? FontWeight.bold : FontWeight.normal,
+                        color: _tab == 0 ? AppColors.onPrimary : AppColors.textSecondary,
+                      )),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _tab = 1),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _tab == 1 ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text('Bulan Ini', style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: _tab == 1 ? FontWeight.bold : FontWeight.normal,
+                        color: _tab == 1 ? AppColors.onPrimary : AppColors.textSecondary,
+                      )),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           summaryAsync.when(
@@ -161,7 +201,7 @@ class _SummaryCards extends StatelessWidget {
               summary.totalProfit,
               Icons.account_balance_wallet,
               summary.totalProfit >= 0
-                  ? AppColors.primary
+                  ? AppColors.success
                   : AppColors.error,
               isWide, textTheme,
             ),
@@ -231,8 +271,14 @@ class _TransactionRow extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          )
+        ],
       ),
       child: Row(
         children: [

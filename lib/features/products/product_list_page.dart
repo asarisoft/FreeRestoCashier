@@ -16,6 +16,7 @@ class ProductListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Produk')),
       body: productsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -38,6 +39,8 @@ class ProductListPage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_product',
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         onPressed: () => _openForm(context, ref),
         child: const Icon(Icons.add),
       ),
@@ -120,8 +123,14 @@ class _ProductCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            )
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +140,8 @@ class _ProductCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     product.name,
-                    style: textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -146,7 +155,10 @@ class _ProductCard extends StatelessWidget {
             const Spacer(),
             AmountText(
               amount: product.price,
-              style: textTheme.titleMedium,
+              style: textTheme.titleMedium?.copyWith(
+                color: AppColors.price,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             if (product.hpp > 0)
               Text(
