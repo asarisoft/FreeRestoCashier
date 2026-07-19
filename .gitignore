@@ -1,3 +1,10 @@
+# iOS build cache
+ios/Build/
+ios/Build.noindex/
+
+# Android build reports
+android/build/reports/
+
 # Miscellaneous
 *.class
 *.log
