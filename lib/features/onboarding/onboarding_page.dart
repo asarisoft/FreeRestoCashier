@@ -38,67 +38,136 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       appBar: AppBar(title: const Text('Setup Resto')),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(24),
+        child: Row(
           children: [
-            Text('Pengaturan Awal', style: textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(
-              'Lengkapi data restoran Anda',
-              style: textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _nameCtrl,
-              decoration: const InputDecoration(labelText: 'Nama Resto *'),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _addressCtrl,
-              decoration: const InputDecoration(labelText: 'Alamat'),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _phoneCtrl,
-              decoration: const InputDecoration(labelText: 'No. Telepon'),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _footerCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Footer Struk',
-                hintText: 'Terima kasih',
+            // Left Column: Promo / Features
+            Expanded(
+              flex: 4,
+              child: Container(
+                color: AppColors.primary,
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.star, color: Colors.white, size: 48),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Selamat Datang di\nRESTO FLOW FREE',
+                      style: textTheme.displaySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Aplikasi kasir pintar untuk bisnis restoran dan kafe Anda. Didesain secara profesional, mudah digunakan, dan 100% GRATIS tanpa batasan fitur maupun biaya tersembunyi.',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                    _featureRow(Icons.check_circle, 'Kelola Produk Tanpa Batas', textTheme),
+                    const SizedBox(height: 12),
+                    _featureRow(Icons.check_circle, 'Catat Pengeluaran & Pemasukan', textTheme),
+                    const SizedBox(height: 12),
+                    _featureRow(Icons.check_circle, 'Cetak Struk Bluetooth Thermal', textTheme),
+                    const SizedBox(height: 12),
+                    _featureRow(Icons.check_circle, 'Laporan Keuangan Realtime', textTheme),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            Text('Ukuran Kertas Printer',
-                style: textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _sizeCard(58, '58 mm'),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _sizeCard(80, '80 mm'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            PrimaryButton(
-              label: 'Simpan & Mulai',
-              loading: _saving,
-              onPressed: _save,
+            // Right Column: Form
+            Expanded(
+              flex: 5,
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+                children: [
+                  Text('Pengaturan Awal', style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Lengkapi profil restoran Anda untuk dicetak pada struk.',
+                    style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 32),
+                  TextFormField(
+                    controller: _nameCtrl,
+                    decoration: const InputDecoration(labelText: 'Nama Resto *'),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? 'Wajib diisi' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _addressCtrl,
+                    decoration: const InputDecoration(labelText: 'Alamat'),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneCtrl,
+                    decoration: const InputDecoration(labelText: 'No. Telepon'),
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _footerCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Pesan Footer Struk',
+                      hintText: 'Misal: Terima kasih telah berkunjung',
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Text('Ukuran Kertas Printer (Thermal)',
+                      style: textTheme.titleMedium),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _sizeCard(58, '58 mm'),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _sizeCard(80, '80 mm'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
+                  PrimaryButton(
+                    label: 'Simpan Profil & Mulai',
+                    loading: _saving,
+                    onPressed: _save,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _featureRow(IconData icon, String text, TextTheme textTheme) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 24),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: textTheme.bodyLarge?.copyWith(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 

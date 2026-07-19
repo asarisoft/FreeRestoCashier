@@ -103,7 +103,7 @@ class _MainShellState extends ConsumerState<_MainShell> {
                           children: [
                             const Icon(Icons.local_fire_department, color: AppColors.primary, size: 32),
                             const SizedBox(width: 12),
-                            Text('POSPRO', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                            Text('Resto Flow Free', style: AppTypography.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),

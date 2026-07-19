@@ -19,48 +19,111 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final textTheme = AppTypography.textTheme;
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+      backgroundColor: AppColors.background,
+      body: Row(
+        children: [
+          // Left side: Image
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/images/login_bg.png',
+                  fit: BoxFit.cover,
                 ),
-                child: const Icon(
-                  Icons.restaurant_menu_rounded,
-                  size: 40,
-                  color: AppColors.primary,
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.6),
+                        Colors.black.withValues(alpha: 0.2),
+                        Colors.transparent,
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Kasir Resto',
-                style: textTheme.displayMedium
-                    ?.copyWith(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Catat penjualan, kelola produk,\ndan cetak struk dengan mudah',
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              PrimaryButton(
-                label: 'Masuk dengan Google',
-                icon: Icons.login,
-                loading: _loading,
-                onPressed: _loading ? null : () => _signIn(),
-              ),
-            ],
+                Positioned(
+                  bottom: 48,
+                  left: 48,
+                  right: 48,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kelola Resto Anda\nLebih Profesional.',
+                        style: textTheme.displayMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aplikasi POS premium 100% Gratis.\nTanpa biaya langganan selamanya.',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          // Right side: Login Form
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 48),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.local_fire_department,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'RESTO FLOW FREE',
+                      style: textTheme.displaySmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Silakan masuk untuk melanjutkan',
+                      style: textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+                    PrimaryButton(
+                      label: 'Masuk dengan Google',
+                      icon: Icons.login,
+                      loading: _loading,
+                      onPressed: _loading ? null : () => _signIn(),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Aplikasi kasir ini 100% Gratis.',
+                      style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
