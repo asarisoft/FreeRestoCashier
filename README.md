@@ -1,35 +1,35 @@
 # Resto Flow Free
 
-> Aplikasi POS kasir gratis untuk restoran dan kafe. Catat penjualan, kelola produk, cetak struk via Bluetooth thermal printer.
+> Free POS cashier app for restaurants and cafes. Track sales, manage products, print receipts via Bluetooth thermal printer.
 
-## Fitur
+## Features
 
-- **Kasir (POS)** — keranjang belanja realtime, diskon per item & total, multi metode pembayaran
-- **Produk** — CRUD produk dengan kategori, harga, HPP, status ready, dan foto
-- **Pengeluaran** — catat biaya operasional harian
-- **Laporan** — ringkasan omzet, pengeluaran, laba kotor & bersih per hari/bulan
-- **Cetak Struk** — Bluetooth thermal printer 58mm / 80mm (ESC/POS)
-- **Multi-perangkat** — login dengan Google, data tersimpan di Cloud Firestore
+- **POS Cashier** — realtime shopping cart, per-item & total discount, multiple payment methods
+- **Products** — CRUD with categories, price, cost (HPP), ready status, and photos
+- **Expenses** — track daily operational costs
+- **Reports** — revenue, expenses, gross & net profit summaries by day/month
+- **Receipt Printing** — Bluetooth thermal printer 58mm / 80mm (ESC/POS)
+- **Multi-device** — Google sign-in, data stored in Cloud Firestore
 
 ## Tech Stack
 
-| Layer | Teknologi |
+| Layer | Technology |
 |-------|-----------|
 | Framework | Flutter (Dart) |
 | State Management | Riverpod |
 | Auth | Firebase Auth + Google Sign-In |
 | Database | Cloud Firestore |
-| Storage | Firebase Storage (foto produk) |
+| Storage | Firebase Storage (product photos) |
 | Printer | ESC/POS via Bluetooth SPP |
 | Font | Inter (Google Fonts) |
 
-## Persiapan Firebase
+## Firebase Setup
 
-1. Buat project di [Firebase Console](https://console.firebase.google.com)
-2. Aktifkan **Authentication → Sign-in method → Google**
-3. Buat **Cloud Firestore** (mode production)
-4. Tambah aplikasi Android → download `google-services.json` → taruh di `android/app/`
-5. Tambah **SHA-1 fingerprint** ke Firebase Android app:
+1. Create a project at [Firebase Console](https://console.firebase.google.com)
+2. Enable **Authentication → Sign-in method → Google**
+3. Create a **Cloud Firestore** database (production mode)
+4. Add an Android app → download `google-services.json` → place it in `android/app/`
+5. Add **SHA-1 fingerprint** to your Firebase Android app:
    ```
    A7:80:DD:F6:F4:35:E6:77:98:E1:59:E2:CB:C8:28:B2:0D:25:BC:B5
    ```
@@ -45,7 +45,7 @@
    }
    ```
 
-## Cara Jalankan
+## Getting Started
 
 ```bash
 # clone
@@ -58,11 +58,11 @@ flutter pub get
 # generate app icon (optional)
 dart run flutter_launcher_icons
 
-# jalankan
+# run
 flutter run
 ```
 
-> **Catatan**: Pastikan `google-services.json` sudah ada di `android/app/` sebelum menjalankan app.
+> **Note**: Make sure `google-services.json` exists in `android/app/` before running the app.
 
 ## Build APK
 
